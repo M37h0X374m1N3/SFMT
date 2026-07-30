@@ -36,8 +36,12 @@ class SourceBytes {
         return buffer_[index];
     }
 
-    std::string_view view(std::uint32_t pos, std::uint32_t len) {
+    std::string_view substr(std::uint32_t pos, std::uint32_t len) {
         return std::string_view(buffer_).substr(pos, len);
+    }
+
+    std::size_t size() const {
+        return buffer_.size();
     }
 
    private:

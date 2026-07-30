@@ -30,6 +30,7 @@ constexpr uint8_t kw_max_len = []() consteval {
     for (auto s : kw_src) m = std::max<uint8_t>(m, s.size());
     return m;
 }();
+
 constexpr uint8_t kw_min_len = []() consteval {
     uint8_t m { 255 };
     for (auto s : kw_src) m = std::min<uint8_t>(m, s.size());

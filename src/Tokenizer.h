@@ -1,10 +1,8 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
-#include <string_view>
 #include <utility>
 
 #include "Classify.h"

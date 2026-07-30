@@ -14,8 +14,10 @@ enum class FileCode : std::uint32_t {
 
 struct Diagnostic {
     FileCode code {};
+    /* currently not using line and col because every error is a file scope error */
     std::uint32_t line {};
     std::uint32_t col {};
+    /* consider removing this if they're unnecessary */
 };
 
 template <class T>

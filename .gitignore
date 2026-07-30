@@ -1,5 +1,16 @@
+# debug and binaries
+
 bin/
 build/
+debug/
+test/
+
+# personal preference
+
 .clang-format
+
+# cmake artifacts I don't want tracked
+
+.cache/
 CMakePresets.json
 compile_commands.json

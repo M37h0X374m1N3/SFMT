@@ -160,6 +160,14 @@ class SingleArray {
         data_ = std::move(buf);
     }
 
+    uint32_t size() {
+        return size_;
+    }
+
+    uint32_t cap() {
+        return cap_;
+    }
+
    private:
     std::unique_ptr<T[]> data_;
     uint32_t size_;

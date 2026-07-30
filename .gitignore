@@ -1,5 +1,5 @@
 bin/
 build/
-CLAUDE.md
-.env
 .clang-format
+CMakePresets.json
+compile_commands.json

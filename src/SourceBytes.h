@@ -35,8 +35,9 @@ class SourceBytes {
         assert(index <= buffer_.size());
         return buffer_[index];
     }
-    std::string_view substr(size_t n_start, size_t n_len) const {
-        return std::string_view(buffer_.substr(n_start, n_len));
+
+    std::string_view view(std::uint32_t pos, std::uint32_t len) {
+        return std::string_view(buffer_).substr(pos, len);
     }
 
    private:

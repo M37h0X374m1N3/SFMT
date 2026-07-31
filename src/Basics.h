@@ -160,11 +160,11 @@ class SingleArray {
         data_ = std::move(buf);
     }
 
-    uint32_t size() {
+    uint32_t size() const {
         return size_;
     }
 
-    uint32_t cap() {
+    uint32_t cap() const {
         return cap_;
     }
 
@@ -178,6 +178,8 @@ struct MultiArray {
     SingleArray<uint32_t> starts;
     SingleArray<Tag> tags;
     SingleArray<TokenFlags> flags;
+
+
 };
 
 #endif

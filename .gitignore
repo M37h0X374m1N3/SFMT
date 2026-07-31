@@ -5,6 +5,10 @@ build/
 debug/
 test/
 
+# powershell test scripts
+
+*.ps1
+
 # personal preference
 
 .clang-format

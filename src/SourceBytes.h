@@ -14,7 +14,8 @@
 
 class SourceBytes {
    public:
-    SourceBytes(std::string&& str, std::size_t size) : buffer_(std::move(str)), line_starts_(size / 30 + 8) {
+    SourceBytes(std::string&& str, std::size_t size) : buffer_(std::move(str)) {
+        line_starts_.reserve(buffer_.size() / 30 + 8);
         build_line_starts();
     }
 

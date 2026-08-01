@@ -1,5 +1,20 @@
+# debug and binaries
+
 bin/
 build/
-CLAUDE.md
-.env
+debug/
+test/
+
+# powershell test scripts
+
+*.ps1
+
+# personal preference
+
 .clang-format
+
+# cmake artifacts I don't want tracked
+
+.cache/
+CMakePresets.json
+compile_commands.json

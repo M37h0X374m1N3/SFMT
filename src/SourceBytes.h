@@ -14,7 +14,8 @@
 
 class SourceBytes {
    public:
-    SourceBytes(std::string&& str, std::size_t size) : buffer_(std::move(str)), line_starts_(size / 30 + 8) {
+    SourceBytes(std::string&& str, std::size_t size) : buffer_(std::move(str)) {
+        line_starts_.reserve(buffer_.size() / 30 + 8);
         build_line_starts();
     }
 
@@ -35,8 +36,13 @@ class SourceBytes {
         assert(index <= buffer_.size());
         return buffer_[index];
     }
-    std::string_view substr(size_t n_start, size_t n_len) const {
-        return std::string_view(buffer_.substr(n_start, n_len));
+
+    std::string_view substr(std::uint32_t pos, std::uint32_t len) {
+        return std::string_view(buffer_).substr(pos, len);
+    }
+
+    std::size_t size() const {
+        return buffer_.size();
     }
 
    private:

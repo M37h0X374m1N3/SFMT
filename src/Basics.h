@@ -1,11 +1,10 @@
 #ifndef BASICS_H
 #define BASICS_H
 
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <memory>
-#include <utility>
+#include <tuple>
 #include <cassert>
 
 using std::uint64_t, std::uint32_t, std::uint16_t, std::uint8_t, std::size_t;
@@ -138,55 +137,46 @@ struct TokenFlags {
 };
 
 /* contiguous allocated list */
-
 template <class T> class SingleArray {
 public:
   SingleArray(uint32_t n)
-      : data_{std::make_unique_for_overwrite<T[]>(n)}, size_{}, cap_{n} {}
+      : data_{std::make_unique_for_overwrite<T[]>(n)} {}
+  /* only delete move because unique data_ makes it uncopyable */
+  SingleArray(SingleArray&&) = delete;
+  SingleArray &operator=(SingleArray&&) = delete;
 
-  T &operator[](uint32_t index) { return data_[index]; }
   const T &operator[](uint32_t index) const { return data_[index]; }
-
-  uint32_t size() const { return size_; }
-
-  uint32_t cap() const { return cap_; }
-
   friend class MultiArray;
-
 private:
-
-  void push(T t) {
-    new (data_.get() + size_) T(std::move(t));
-    ++size_;
-  }
-
-  void shrink_fit() {
-    cap_ = size_;
-    auto buf = std::make_unique_for_overwrite<T[]>(size_);
-    std::memcpy(buf.get(), data_.get(), size_ * sizeof(T));
-    data_ = std::move(buf);
-  }
-
+  T *get() { return data_.get(); }
   std::unique_ptr<T[]> data_;
-  uint32_t size_;
-  uint32_t cap_;
 };
 
-struct MultiArray {
-  SingleArray<uint32_t> starts;
-  SingleArray<uint32_t> ends;
-  SingleArray<Tag> tags;
-  SingleArray<TokenFlags> flags;
+class MultiArray {
+public:
+  MultiArray(uint32_t res) : starts_(res), ends_(res), tags_(res), flags_(res), cap_(res) {}
 
+  MultiArray(MultiArray&&) = delete;
+  MultiArray &operator=(MultiArray&&) = delete;
+  /* uses placement new to write to prealloc'd mem */
   void push(uint32_t s, uint32_t e, Tag t, TokenFlags f) {
-      starts.push(s), ends.push(e), tags.push(t), flags.push(f);
+      assert(size_ < cap_);
+      new (starts_.get() + size_) uint32_t(s);
+      new (ends_.get() + size_) uint32_t(e);
+      new (tags_.get() + size_) Tag(t);
+      new (flags_.get() + size_) TokenFlags(f);
+      ++size_;
   }
-    
-  uint32_t size() const {
-      assert(starts.size() == ends.size() && ends.size() == tags.size() && tags.size() == flags.size());
-      return starts.size();
-  }
+  uint32_t size() const { return size_; }
+  auto arrays() const & { return std::tie(starts_, ends_, tags_, flags_); }
+  auto arrays() const && = delete;
 
+private:
+  SingleArray<uint32_t> starts_, ends_;
+  SingleArray<Tag> tags_;
+  SingleArray<TokenFlags> flags_;
+  uint32_t size_ {};
+  uint32_t cap_;
 };
 
 #endif

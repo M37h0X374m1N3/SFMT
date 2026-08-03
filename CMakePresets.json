@@ -1,0 +1,77 @@
+{
+    "version": 10,
+    "configurePresets": [
+        {
+            "name": "_base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": { "CMAKE_EXPORT_COMPILE_COMMANDS": true }
+        },
+        {
+            "name": "gcc-x64-debug",
+            "displayName": "Linux GCC Debug Build (x64)",
+            "inherits": "_base",
+            "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_CXX_FLAGS": "-m64",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_SCAN_FOR_MODULES": false
+            }
+        },
+        {
+            "name": "gcc-x86-debug",
+            "displayName": "Linux GCC Debug Build (x86)",
+            "inherits": "_base",
+            "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++", 
+                "CMAKE_CXX_FLAGS": "-m32",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_SCAN_FOR_MODULES": false
+            }
+        },
+        {
+            "name": "msvc-x64-debug",
+            "displayName": "Windows MSVC Debug Build (x64)",
+            "inherits": "_base",
+            "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+            "architecture": { "value": "x64", "strategy": "external" },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+
+        },
+        {
+            "name": "msvc-x86-debug",
+            "displayName": "Windows MSVC Debug Build (x86)",
+            "inherits": "_base",
+            "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+            "architecture": { "value": "x86", "strategy": "external" },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug" 
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "gcc-x64-debug",
+            "configurePreset": "gcc-x64-debug"
+        },
+        {
+            "name": "gcc-x86-debug",
+            "configurePreset": "gcc-x86-debug"
+        },
+        {
+            "name": "msvc-x64-debug",
+            "configurePreset": "msvc-x64-debug"
+        },
+        {
+            "name": "msvc-x86-debug",
+            "configurePreset": "msvc-x86-debug"
+        }
+    ]
+}

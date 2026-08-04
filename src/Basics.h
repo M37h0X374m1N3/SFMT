@@ -1,11 +1,12 @@
 #ifndef BASICS_H
 #define BASICS_H
 
+#include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <memory>
+#include <span>
 #include <tuple>
-#include <cassert>
 
 using std::uint64_t, std::uint32_t, std::uint16_t, std::uint8_t, std::size_t;
 
@@ -129,9 +130,6 @@ struct TokenFlags {
   void set(uint8_t bit) { bits |= bit; }
   void clear(uint8_t bit) { bits &= ~bit; }
 
-  uint8_t operator|(uint8_t bit) const { return bits | bit; }
-  uint8_t operator|(Radix r) const { return (bits & ~radix_mask) | r; }
-
   Radix radix() const { return static_cast<Radix>(bits & radix_mask); }
   void set_radix(Radix r) { bits = (bits & ~radix_mask) | r; }
 };
@@ -139,43 +137,70 @@ struct TokenFlags {
 /* contiguous allocated list */
 template <class T> class SingleArray {
 public:
-  SingleArray(uint32_t n)
-      : data_{std::make_unique_for_overwrite<T[]>(n)} {}
-  /* only delete move because unique data_ makes it uncopyable */
-  SingleArray(SingleArray&&) = delete;
-  SingleArray &operator=(SingleArray&&) = delete;
+  SingleArray(uint32_t n) : data_{std::make_unique_for_overwrite<T[]>(n)} {}
+
+  SingleArray(SingleArray &&) = delete;
+  SingleArray &operator=(SingleArray &&) = delete;
 
   const T &operator[](uint32_t index) const { return data_[index]; }
+
   friend class MultiArray;
+
 private:
   T *get() { return data_.get(); }
+  const T *data() const { return data_.get(); }
   std::unique_ptr<T[]> data_;
 };
 
 class MultiArray {
 public:
-  MultiArray(uint32_t res) : starts_(res), ends_(res), tags_(res), flags_(res), cap_(res) {}
+  MultiArray(uint32_t res)
+      : starts_(res), ends_(res), tags_(res), flags_(res), cap_(res) {}
 
-  MultiArray(MultiArray&&) = delete;
-  MultiArray &operator=(MultiArray&&) = delete;
-  /* uses placement new to write to prealloc'd mem */
+  MultiArray(MultiArray &&) = delete;
+  MultiArray &operator=(MultiArray &&) = delete;
+
   void push(uint32_t s, uint32_t e, Tag t, TokenFlags f) {
-      assert(size_ < cap_);
-      new (starts_.get() + size_) uint32_t(s);
-      new (ends_.get() + size_) uint32_t(e);
-      new (tags_.get() + size_) Tag(t);
-      new (flags_.get() + size_) TokenFlags(f);
-      ++size_;
+    assert(size_ < cap_);
+    starts_.get()[size_] = s;
+    ends_.get()[size_] = e;
+    tags_.get()[size_] = t;
+    flags_.get()[size_] = f;
+    ++size_;
   }
+
+  uint32_t starts(uint32_t i) const {
+    assert(i < size_);
+    return starts_[i];
+  }
+  uint32_t ends(uint32_t i) const {
+    assert(i < size_);
+    return ends_[i];
+  }
+  Tag tags(uint32_t i) const {
+    assert(i < size_);
+    return tags_[i];
+  }
+  TokenFlags flags(uint32_t i) const {
+    assert(i < size_);
+    return flags_[i];
+  }
+
   uint32_t size() const { return size_; }
-  auto arrays() const & { return std::tie(starts_, ends_, tags_, flags_); }
-  auto arrays() const && = delete;
+  uint32_t cap() const { return cap_; }
+
+  auto arrays() const {
+    return std::tuple{std::span<const uint32_t>{starts_.data(), size_},
+                      std::span<const uint32_t>{ends_.data(), size_},
+                      std::span<const Tag>{tags_.data(), size_},
+                      std::span<const TokenFlags>{flags_.data(), size_}};
+  }
 
 private:
   SingleArray<uint32_t> starts_, ends_;
   SingleArray<Tag> tags_;
   SingleArray<TokenFlags> flags_;
-  uint32_t size_ {};
+  uint32_t size_{};
   uint32_t cap_;
 };
 

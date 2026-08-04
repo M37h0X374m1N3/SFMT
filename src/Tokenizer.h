@@ -131,7 +131,7 @@ private:
         case '\n':
           return {start, ++pos_, Tag::endstmt, flags};
         case '\0': {
-          if (flags.has(TokenFlags::has_escape))
+          if (flags.has(TokenFlags::has_escape) || pos_ == src_.size())
             flags.set(TokenFlags::has_error);
           return {pos_, pos_, Tag::eof, flags};
         }
@@ -180,7 +180,8 @@ private:
             state = State::in_unprefixed_num;
             continue;
           }
-          return {start, ++pos_, Tag::none, flags | TokenFlags::has_error};
+          flags.set(TokenFlags::has_error);
+          return {start, ++pos_, Tag::none, flags};
         }
         }
       }
@@ -217,7 +218,8 @@ private:
 
       case State::seen_hex_post: {
         if (!is_ident_alnum(c)) {
-          return {start, pos_, Tag::number, flags | TokenFlags::hex};
+          flags.set_radix(TokenFlags::hex);
+          return {start, pos_, Tag::number, flags};
         }
         ++pos_;
         state = State::in_num_malformed;
@@ -226,7 +228,8 @@ private:
 
       case State::seen_oct_post: {
         if (!is_ident_alnum(c)) {
-          return {start, pos_, Tag::number, flags | TokenFlags::oct};
+          flags.set_radix(TokenFlags::oct);
+          return {start, pos_, Tag::number, flags};
         }
         ++pos_;
         state = State::in_num_malformed;
@@ -235,7 +238,8 @@ private:
 
       case State::seen_bin_post: {
         if (!is_ident_alnum(c)) {
-          return {start, pos_, Tag::number, flags | TokenFlags::bin};
+          flags.set_radix(TokenFlags::bin);
+          return {start, pos_, Tag::number, flags};
         }
         ++pos_;
         state = is_hex(c) ? State::in_unprefixed_hex : State::in_num_malformed;
@@ -369,7 +373,8 @@ private:
           ++pos_;
           continue;
         }
-        return {start, pos_, Tag::number, flags | TokenFlags::has_error};
+        flags.set(TokenFlags::has_error);
+        return {start, pos_, Tag::number, flags};
       }
 
       case State::in_unprefixed_num: {
@@ -398,7 +403,8 @@ private:
           ++pos_;
           continue;
         }
-        return {start, pos_, Tag::number, flags | TokenFlags::has_error};
+        flags.set(TokenFlags::has_error);
+        return {start, pos_, Tag::number, flags};
       }
 
       case State::in_prefixed_hex: {

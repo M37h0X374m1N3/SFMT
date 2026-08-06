@@ -10,6 +10,8 @@
 
 using std::uint64_t, std::uint32_t, std::uint16_t, std::uint8_t, std::size_t;
 
+constexpr uint32_t max_lookahead = 4;
+
 /* primary token identifier | keep to tokens and keywords only */
 enum class Tag : uint8_t {
   none = 0,
@@ -155,8 +157,9 @@ private:
 
 class MultiArray {
 public:
-  MultiArray(uint32_t res)
-      : starts_(res), ends_(res), tags_(res), flags_(res), cap_(res) {}
+  static MultiArray init_ceil64(uint32_t n) {
+      return MultiArray((n + 127) & ~63, n);
+  }
 
   MultiArray(MultiArray &&) = delete;
   MultiArray &operator=(MultiArray &&) = delete;
@@ -198,6 +201,7 @@ public:
   }
 
 private:
+  MultiArray(uint32_t ceil, uint32_t n) : starts_(ceil), ends_(ceil), tags_(ceil), flags_(ceil), cap_(n) {}
   SingleArray<uint32_t> starts_, ends_;
   SingleArray<Tag> tags_;
   SingleArray<TokenFlags> flags_;
@@ -259,10 +263,9 @@ enum class NodeTag : uint8_t {
 class NodeArray {
 
 public:
-  NodeArray(uint32_t nres, uint32_t eres)
-      : tags_(nres), main_(nres), lhs_(nres), rhs_(nres), extra_(eres),
-        cap_(nres), extra_cap_(eres) {
-    add(NodeTag::none, 0, 0, 0);
+
+  static NodeArray init_ceil64(uint32_t n) {
+      return NodeArray((n + 64) & ~63, n);
   }
 
   NodeArray(NodeArray &&) = delete;
@@ -318,6 +321,12 @@ public:
   }
 
 private:
+
+  NodeArray(uint32_t ceil, uint32_t n)
+      : tags_(ceil), main_(ceil), lhs_(ceil), rhs_(ceil), extra_(ceil), cap_(n), extra_cap_(n) {
+    add(NodeTag::none, 0, 0, 0);
+  }
+
   SingleArray<NodeTag> tags_;
   SingleArray<uint32_t> main_, lhs_, rhs_;
   SingleArray<uint32_t> extra_;

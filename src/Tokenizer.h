@@ -8,7 +8,9 @@
 #include "Classify.h"
 #include "Keywords.h"
 #include "SourceBytes.h"
+
 // test ->
+
 class Tokenizer {
 public:
   Tokenizer(const SourceBytes &src) : src_(src) {}
@@ -20,6 +22,8 @@ public:
       if (tag == Tag::eof)
         break;
     }
+    for (uint32_t i{}; i < max_lookahead; ++i)
+        out.push(pos_, pos_, Tag::eof, {});
   }
 
   char get() const { return src_[pos_]; }
@@ -304,13 +308,11 @@ private:
       }
 
       case State::seen_angle_left: {
-        return c == '<' ? Token{start, ++pos_, Tag::l_shift, flags}
-                        : Token{start, pos_, Tag::l_angle_bracket, flags};
+        return Token{start, ++pos_, (c == '=' ? Tag::l_angle_equal : Tag::l_angle_bracket), flags};
       }
 
       case State::seen_angle_right: {
-        return c == '>' ? Token{start, ++pos_, Tag::r_shift, flags}
-                        : Token{start, pos_, Tag::r_angle_bracket, flags};
+        return Token{start, ++pos_, (c == '=' ? Tag::r_angle_equal : Tag::r_angle_bracket), flags};
       }
 
       case State::seen_backslash: {

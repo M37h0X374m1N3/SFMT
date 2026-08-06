@@ -14,3 +14,8 @@ compile_flags.txt
 
 *.ps1
 *.sh
+
+# AI stuff
+
+CLAUDE.md
+.claude/

@@ -25,48 +25,6 @@ public:
   Parser(Parser &&) = delete;
   Parser &operator=(Parser &&) = delete;
 
-  void parse() {
-    while (peek() != Tag::eof) {
-      advance();
-    }
-  }
-
-  uint32_t parse_expr(uint8_t min_prec = 1) {
-    uint32_t lhs{parse_primary()};
-    while (true) {
-      uint8_t p{prec[std::to_underlying(peek())]};
-      if (p < min_prec)
-          return lhs;
-      uint32_t op_tok { pos_ };
-      advance();
-      uint32_t rhs { parse_expr(p + 1) };
-      lhs = out_.add(NodeTag::binary, op_tok, lhs, rhs);
-    }
-  }
-
-  uint32_t parse_primary() {
-    uint32_t t{pos_};
-    switch (peek()) {
-    case Tag::number:
-      advance();
-      return out_.add(NodeTag::number, t, 0, 0);
-    case Tag::identifier:
-      advance();
-      return out_.add(NodeTag::ident, t, 0, 0);
-    case Tag::string:
-      advance();
-      return out_.add(NodeTag::string, t, 0, 0);
-    case Tag::dollar_sign:
-      advance();
-      return out_.add(NodeTag::here, t, 0, 0);
-    case Tag::double_dollar_sign:
-      advance();
-      return out_.add(NodeTag::section_base, t, 0, 0);
-    default:
-      return 0;
-    }
-  };
-
 private:
   Tag peek(uint32_t i = 0) const {
     assert(i < max_lookahead);

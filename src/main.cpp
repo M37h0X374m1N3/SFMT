@@ -33,7 +33,6 @@ int main(int argc, const char **argv) {
   stdout_test(tokens, src);
   auto nodes{NodeArray::init_ceil64(SourceSize)};
   Parser parser(tokens, nodes);
-  parser.parse();
 
 #endif
 

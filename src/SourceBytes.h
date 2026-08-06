@@ -78,7 +78,7 @@ private:
   }
 
   std::string buffer_;
-  std::vector<std::uint32_t> line_starts_;
+  std::vector<std::uint32_t> line_starts_; // for the trivia preserving parser, later
 };
 
 #endif

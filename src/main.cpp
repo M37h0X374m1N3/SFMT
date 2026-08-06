@@ -2,6 +2,7 @@
 
 #include "SourceBytes.h"
 #include "Tokenizer.h"
+#include "Parser.h"
 
 #ifdef DEBUG
 void stdout_test(const MultiArray &arr, const SourceBytes &sb);
@@ -23,11 +24,16 @@ int main(int argc, const char **argv) {
 
   const SourceBytes src{std::move(*srcRes)};
   Tokenizer tok{src};
-  MultiArray mar{src.size()};
+  MultiArray mar{src.size() + 1};
 
   tok.scan(mar);
 #ifdef DEBUG
   stdout_test(mar, src);
+  NodeArray nar{src.size() + 1, src.size() + 1};
+  Parser prs(mar, nar);
+  prs.parse();
 #endif
+
+
   return 0;
 }

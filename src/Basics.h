@@ -145,6 +145,7 @@ public:
   const T &operator[](uint32_t index) const { return data_[index]; }
 
   friend class MultiArray;
+  friend class NodeArray;
 
 private:
   T *get() { return data_.get(); }
@@ -202,6 +203,126 @@ private:
   SingleArray<TokenFlags> flags_;
   uint32_t size_{};
   uint32_t cap_;
+};
+
+enum class NodeTag : uint8_t {
+  none,
+  root,
+  label_def,
+  instruction,
+  data_def,
+  reserve,
+  equ,
+  assign,
+  fix,
+  purge,
+  restore,
+  format,
+  section,
+  segment,
+  org,
+  entry,
+  bits,
+  d_extern,
+  d_public,
+  display,
+  include,
+  macro_def,
+  struc_def,
+  struct_def,
+  if_stmt,
+  else_stmt,
+  while_stmt,
+  repeat,
+  match,
+  local,
+  common,
+  forward,
+  reverse,
+  block,
+  // expression
+  number,
+  string,
+  ident,
+  here,
+  section_base,
+  anon_label,
+  unary,
+  binary,
+  mem,
+  sized,
+  seg_offset,
+  dup,
+  uninit
+};
+
+class NodeArray {
+
+public:
+  NodeArray(uint32_t nres, uint32_t eres)
+      : tags_(nres), main_(nres), lhs_(nres), rhs_(nres), extra_(eres),
+        cap_(nres), extra_cap_(eres) {
+    add(NodeTag::none, 0, 0, 0);
+  }
+
+  NodeArray(NodeArray &&) = delete;
+  NodeArray &operator=(NodeArray &&) = delete;
+
+  uint32_t add(NodeTag t, uint32_t main, uint32_t lhs, uint32_t rhs) {
+    assert(size_ < cap_);
+    tags_.get()[size_] = t;
+    main_.get()[size_] = main;
+    lhs_.get()[size_] = lhs;
+    rhs_.get()[size_] = rhs;
+    return size_++;
+  }
+
+  void push_extra(uint32_t slot) {
+    assert(extra_size_ < extra_cap_);
+    extra_.get()[extra_size_++] = slot;
+  }
+
+  NodeTag tags(uint32_t i) const {
+    assert(i < size_);
+    return tags_[i];
+  }
+  uint32_t main(uint32_t i) const {
+    assert(i < size_);
+    return main_[i];
+  }
+  uint32_t lhs(uint32_t i) const {
+    assert(i < size_);
+    return lhs_[i];
+  }
+  uint32_t rhs(uint32_t i) const {
+    assert(i < size_);
+    return rhs_[i];
+  }
+
+  uint32_t extra(uint32_t k) const {
+    assert(k < extra_size_);
+    return extra_[k];
+  }
+
+  uint32_t size() const { return size_; }
+  uint32_t cap() const { return cap_; }
+  uint32_t extra_size() const { return extra_size_; }
+  uint32_t extra_cap() const { return extra_cap_; }
+
+  auto arrays() const {
+    return std::tuple{std::span<const NodeTag>{tags_.data(), size_},
+                      std::span<const uint32_t>{main_.data(), size_},
+                      std::span<const uint32_t>{lhs_.data(), size_},
+                      std::span<const uint32_t>{rhs_.data(), size_},
+                      std::span<const uint32_t>{extra_.data(), extra_size_}};
+  }
+
+private:
+  SingleArray<NodeTag> tags_;
+  SingleArray<uint32_t> main_, lhs_, rhs_;
+  SingleArray<uint32_t> extra_;
+  uint32_t size_{}, cap_;
+  uint32_t extra_size_{}, extra_cap_;
 };
 
 #endif

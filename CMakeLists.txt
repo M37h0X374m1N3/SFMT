@@ -15,5 +15,4 @@ target_compile_definitions(SFMT PRIVATE
 
 target_sources(SFMT PRIVATE 
     src/main.cpp
-    src/test/_tokenizer_test.cpp
 )

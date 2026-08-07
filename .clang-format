@@ -1,0 +1,14 @@
+Language: Cpp
+ColumnLimit: 100
+IndentWidth: 4
+PointerAlignment: Right
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Always
+AllowShortFunctionsOnASingleLine: All
+AllowShortEnumsOnASingleLine: true
+Cpp11BracedListStyle: true
+AllowShortLambdasOnASingleLine: All
+IndentCaseLabels: true
+BreakBeforeBraces: Attach
+SpaceBeforeCpp11BracedList: true
